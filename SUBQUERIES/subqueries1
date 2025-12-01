@@ -53,7 +53,28 @@ WHERE o.freight BETWEEN 50 AND 100
 ORDER BY c.company_name, c.contact_name;
 
 
+-- Можно использовать NOT EXISTS
+-- Компании и имена заказчиков, которые не делали заказы в период '1995-02-01' - '1995-02-15'
+SELECT c.company_name, c.contact_name
+FROM customers c
+WHERE NOT EXISTS (
+	SELECT customer_id
+	FROM orders o
+	WHERE customer_id = c.customer_id  -- customer_id совпадает
+	AND o.order_date BETWEEN '1995-02-01' AND '1995-02-15'
+)
+ORDER BY c.company_name, c.contact_name;
 
 
+-- Выбрать продукты, которые не покупались в период '1995-02-01' - '1995-02-15'
 
+SELECT p.product_name
+FROM products p
+WHERE NOT EXISTS (
+	SELECT o.order_id
+	FROM orders o
+	INNER JOIN order_details od USING(order_id)
+	WHERE od.product_id = p.product_id 						-- product_id из p из FROM
+	AND o.order_date BETWEEN '1995-02-01' AND '1995-02-15'
+);
 
