@@ -26,6 +26,7 @@ FROM products p
 WHERE p.units_in_stock > (
 	SELECT AVG(units_in_stock)
 	FROM products
-);
+)
+ORDER BY p.units_in_stock;
 
 
