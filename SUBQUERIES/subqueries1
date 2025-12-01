@@ -1,0 +1,31 @@
+
+-- Найти все компании поставщиков из тех стран, в которые делают заказы заказчики
+SELECT s.company_name
+FROM suppliers s
+WHERE country IN (SELECT DISTINCT country FROM customers)
+-- То же самое
+SELECT DISTINCT s.company_name
+FROM suppliers s
+JOIN customers USING(country);
+
+
+-- Кринж синтетический пример задачи
+SELECT c.category_name, SUM(p.units_in_stock)
+FROM products p
+INNER JOIN categories c USING(category_id)
+GROUP BY c.category_name
+ORDER BY SUM(p.units_in_stock) DESC
+LIMIT(
+	SELECT MIN(product_id) + 4 FROM products
+);
+
+
+-- Товары, количество которых в наличии больше чем в среднем
+SELECT p.product_name, p.units_in_stock
+FROM products p
+WHERE p.units_in_stock > (
+	SELECT AVG(units_in_stock)
+	FROM products
+);
+
+

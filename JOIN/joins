@@ -1,0 +1,92 @@
+SELECT p.product_id, s.company_name, p.units_in_stock
+FROM products p
+INNER JOIN suppliers s 
+ON s.supplier_id = p.supplier_id
+ORDER BY p.units_in_stock DESC;
+
+
+-- Суммарное количество товаров по категориям
+SELECT c.category_name, SUM(p.units_in_stock) AS sum_units_in_stock
+FROM products p
+INNER JOIN categories c
+ON p.category_id = c.category_id
+GROUP BY c.category_name
+ORDER BY SUM(p.units_in_stock)
+LIMIT 5;
+
+
+-- Выбрать суммарную цену товаров по категориям
+-- Товары не должны быть discontinued
+-- Суммарная цена товаров в категории должна быть > 5000  
+SELECT c.category_name, SUM(p.unit_price * p.units_in_stock) AS sum_price
+FROM products p
+INNER JOIN categories c 
+ON p.category_id = c.category_id
+WHERE p.discontinued <> 1
+GROUP BY category_name
+HAVING SUM(p.unit_price * p.units_in_stock) > 5000;
+
+-- На какого работника завязан заказ
+SELECT o.order_id, o.customer_id, e.first_name, e.last_name, e.title
+FROM orders o
+INNER JOIN employees e
+ON o.employee_id = e.employee_id;
+
+
+-- дата заказа
+-- какой товар заказан
+-- страна куда доставить
+-- цена товара
+-- количество
+-- скидка
+SELECT o.order_date, p.product_name, o.ship_country, p.unit_price, od.quantity, od.discount
+FROM orders o
+INNER JOIN order_details od
+ON o.order_id = od.order_id
+INNER JOIN products p
+ON od.product_id = p.product_id;
+
+------------------------------------------------------------------------ LEFT JOIN
+
+SELECT c.company_name, o.order_id
+FROM customers c
+LEFT JOIN orders o
+ON c.customer_id = o.customer_id
+WHERE order_id IS NULL;
+
+-- Убеждаемся, что нет таких работников, на которых не висит заказов
+SELECT e.last_name, o.order_id
+FROM employees e
+LEFT JOIN orders o
+ON e.employee_id = o.employee_id
+WHERE o.order_id is NULL; 
+
+------------------------------------------------------------------------ USING
+-- Вместо 
+-- "ON a.some_id = b.somme_id" 
+-- Можно использовать
+-- "USING(some_id)"
+
+-- дата заказа
+-- какой товар заказан
+-- страна куда доставить
+-- цена товара
+-- количество
+-- скидка
+SELECT o.order_date, p.product_name, o.ship_country, p.unit_price, od.quantity, od.discount
+FROM orders o
+INNER JOIN order_details od USING(order_id)
+INNER JOIN products p USING(product_id);
+
+
+
+------------------------------------------------------------------------ ДЗ
+
+SELECT c.company_name, CONCAT(e.first_name, ' ', e.last_name)
+FROM orders o
+INNER JOIN customers c USING(customer_id)
+INNER JOIN employees e USING(employee_id)
+INNER JOIN shippers s ON o.ship_via = s.shipper_id
+WHERE c.city = 'London' AND e.city = 'London' AND s.company_name = 'Speedy Express';
+
+
