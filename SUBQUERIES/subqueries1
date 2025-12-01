@@ -30,3 +30,30 @@ WHERE p.units_in_stock > (
 ORDER BY p.units_in_stock;
 
 
+
+-------------------------------------------------------------------------- WHERE EXISTS
+
+-- WHERE EXISTS возвращает true, когда в подзапросе была возвращена хотя бы одна строка
+
+-- Компании и имена заказчиков, которые делали заказы весом от 50 до 100
+SELECT c.company_name, c.contact_name
+FROM customers c
+WHERE EXISTS (
+	SELECT customer_id
+	FROM orders o
+	WHERE customer_id = c.customer_id  -- customer_id совпадает
+	AND o.freight BETWEEN 50 AND 100   -- заказ от 50 до 100
+)
+ORDER BY c.company_name, c.contact_name;
+-- То же самое
+SELECT DISTINCT c.company_name, c.contact_name
+FROM customers c
+INNER JOIN orders o USING(customer_id)
+WHERE o.freight BETWEEN 50 AND 100
+ORDER BY c.company_name, c.contact_name;
+
+
+
+
+
+
