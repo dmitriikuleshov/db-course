@@ -78,3 +78,51 @@ WHERE NOT EXISTS (
 	AND o.order_date BETWEEN '1995-02-01' AND '1995-02-15'
 );
 
+
+-------------------------------------------------------------------------- квантификаторы ANY, ALL
+
+-- Выбрать все уникальные компании заказчиков, которые делали заказы > чем на 40 единиц товаров
+
+SELECT DISTINCT c.company_name
+FROM customers c
+JOIN orders o USING(customer_id)
+JOIN order_details USING(order_id)
+WHERE quantity > 40;
+-- То же самое
+SELECT DISTINCT c.company_name
+FROM customers c
+WHERE c.customer_id = ANY(
+	SELECT customer_id
+	FROM orders
+	JOIN order_details USING(order_id)
+	WHERE quantity > 40
+);
+
+
+-- Выбрать такие продукты, количество которых в заказах больше чем в среднем
+SELECT DISTINCT p.product_name, od.quantity
+FROM products p
+JOIN order_details od USING(product_id)
+WHERE quantity > (
+	SELECT AVG(od.quantity)
+	FROM order_details od 
+)
+ORDER BY quantity;
+
+
+
+-- Найти все продукты, количество которых блольше всех средних значений количества заказанных товаров из групп, полученных группированием по product_id
+SELECT DISTINCT p.product_name, od.quantity
+FROM products p
+JOIN order_details od USING(product_id)
+WHERE quantity > ALL( -- то же самое было бы с MAX
+	SELECT AVG(od.quantity)
+	FROM order_details od
+	GROUP BY od.product_id
+)
+ORDER BY od.quantity;
+
+
+
+
+
